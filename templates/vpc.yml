@@ -1,0 +1,20 @@
+Description: VPC network for sonarqube cloud
+
+
+Resources:
+  VPCSonarqube:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: "{{resolve:ssm:/config/infra/rds/vpc-cidr}}"
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: rds-vpc
+
+Outputs:
+  VPCSonarqubeID:
+    Value: !Ref VPCSonarqube
+    Export:
+      Name: RDS-VPCId
