@@ -1,0 +1,109 @@
+Description: Subnets spread across Availability Zones in VPC.
+
+Resources:
+  PrivateSonarqubeSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !ImportValue RDS-VPCId
+      AvailabilityZone: !Select [0, !GetAZs ]
+      CidrBlock: "{{resolve:ssm:/config/infra/rds/cidr-private-subnet-a}}"
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: rds-private-subnet-a
+        - Key: ORGANIZATION
+          Value: BGENERAL
+        - Key: DEPARTMENT
+          Value: DSO
+        - Key: SERVICE_TYPE
+          Value: SUBNET
+        - Key: CATEGORY
+          Value: NETWORKING
+
+  PrivateSonarqubeSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !ImportValue RDS-VPCId
+      AvailabilityZone: !Select [1, !GetAZs ]
+      CidrBlock: "{{resolve:ssm:/config/infra/rds/cidr-private-subnet-b}}"
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: rds-private-subnet-b
+        - Key: ORGANIZATION
+          Value: BGENERAL
+        - Key: DEPARTMENT
+          Value: DSO
+        - Key: SERVICE_TYPE
+          Value: SUBNET
+        - Key: CATEGORY
+          Value: NETWORKING
+
+  PrivateSonarqubeRouteTableA:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !ImportValue RDS-VPCId
+      Tags:
+        - Key: Name
+          Value: dso-ipd-networking-private-sonarqube-rt-a
+        - Key: ORGANIZATION
+          Value: BGENERAL
+        - Key: DEPARTMENT
+          Value: DSO
+        - Key: SERVICE_TYPE
+          Value: ROUTE_TABLE
+        - Key: CATEGORY
+          Value: NETWORKING
+
+  PrivateSonarqubeRouteTableB:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !ImportValue RDS-VPCId
+      Tags:
+        - Key: Name
+          Value: dso-ipd-networking-private-sonarqube-rt-b
+        - Key: ORGANIZATION
+          Value: BGENERAL
+        - Key: DEPARTMENT
+          Value: DSO
+        - Key: SERVICE_TYPE
+          Value: ROUTE_TABLE
+        - Key: CATEGORY
+          Value: NETWORKING
+
+  PrivateSubnetASonarqubeRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSonarqubeSubnetA
+      RouteTableId: !Ref PrivateSonarqubeRouteTableA
+
+  PrivateSubnetBSonarqubeRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSonarqubeSubnetB
+      RouteTableId: !Ref PrivateSonarqubeRouteTableB
+
+Outputs:
+  PrivateSonarqubeSubnetA:
+    Description: A reference to the sonarqube private subnet A Availability Zone
+    Value: !Ref PrivateSonarqubeSubnetA
+    Export:
+      Name: rds-private-subnet-a
+
+  PrivateSonarqubeSubnetB:
+    Description: A reference to the sonarqube private subnet B Availability Zone
+    Value: !Ref PrivateSonarqubeSubnetB
+    Export:
+      Name: rds-private-subnet-b
+
+  PrivateSonarqubeRouteTableA:
+    Description: A reference to the sonarqube private rt subnet a
+    Value: !Ref PrivateSonarqubeRouteTableA
+    Export:
+      Name: dso-ipd-networking-private-sonarqube-rt-a
+
+  PrivateSonarqubeRouteTableB:
+    Description: A reference to the sonarqube private rt subnet b
+    Value: !Ref PrivateSonarqubeRouteTableB
+    Export:
+      Name: dso-ipd-networking-private-sonarqube-rt-b
