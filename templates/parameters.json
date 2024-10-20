@@ -1,0 +1,54 @@
+[
+  {
+    "ParameterKey": "Environment",
+    "ParameterValue": "{Environment}"
+  },
+  {
+    "ParameterKey": "InfraName",
+    "ParameterValue": "{InfraName}"
+  },
+  {
+    "ParameterKey": "SonarqubeVpcId",
+    "ParameterValue": "dso-ipd-networking-sonarqube-vpc-{Environment}-id"
+  },
+  {
+    "ParameterKey": "DsoVpcId",
+    "ParameterValue": "dso-ipd-networking-vpc-{Environment}-vpc-id"
+  },
+  {
+    "ParameterKey": "PrivateDsoSubnets",
+    "ParameterValue": "dso-ipd-networking-subnet-{Environment}-private-subnets"
+  },
+  {
+    "ParameterKey": "PrivateSonarqubeSubnets",
+    "ParameterValue": "dso-ipd-networking-sonarqube-subnet-{Environment}-private-subnets"
+  },
+  {
+    "ParameterKey": "SonarqubeRouteTableA",
+    "ParameterValue": "dso-ipd-networking-private-sonarqube-rt-{Environment}-a"
+  },
+  {
+    "ParameterKey": "SonarqubeRouteTableB",
+    "ParameterValue": "dso-ipd-networking-private-sonarqube-rt-{Environment}-b"
+  },
+  {
+    "ParameterKey": "DsoRouteTableA",
+    "ParameterValue": "dso-ipd-networking-private-rt-{Environment}-a"
+  },
+  {
+    "ParameterKey": "DsoRouteTableB",
+    "ParameterValue": "dso-ipd-networking-private-rt-{Environment}-b"
+  },
+  {
+    "ParameterKey": "SonarqubeSecurityGroup",
+    "ParameterValue": "dso-ipd-networking-sonarqube-sg-{Environment}-sg"
+  },
+  {
+    "ParameterKey": "DBClusterIdentifier",
+    "ParameterValue": "dso-ipd-rds-serverless-cluster-sonarqube-{Environment}"
+  },
+  {
+    "ParameterKey": "DBName",
+    "ParameterValue": "sonarqube"
+  }
+]
