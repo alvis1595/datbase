@@ -1,0 +1,103 @@
+Description: AWS PostgreSql database config
+
+
+Parameters:
+  DBClusterIdentifier:
+    Description: An environment name that will be prefixed to resource names
+    Type: String
+    Default: dso-ipd-rds-serverless-cluster-sonarqube
+
+  RDSEngine:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: '/config/infra/devops/rds-postgres/engine'
+    Description: 'RDS Cluster engine'
+
+  RDSInstanceClass:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: '/config/infra/devops/rds-postgres/instance-class'
+    Description: 'RDS instance class'
+
+Resources:
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group used for aurora postgresql database
+      SubnetIds: 
+        - !ImportValue rds-private-subnet-a
+        - !ImportValue rds-private-subnet-b
+      Tags:
+        - Key: Name
+          Value: dso-ipd-sonarqube-rds-subnet-group
+
+  RdsDbClusterSonarqube:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      DBClusterIdentifier: !Ref DBClusterIdentifier
+      DatabaseName : !Ref DBName
+      Engine: !Ref RDSEngine
+      EngineVersion: "{{resolve:ssm:/config/infra/devops/rds-postgres/engine-version}}"
+      MasterUsername: "{{resolve:secretsmanager:dso-ipd-sonarqube-rds-credentials:SecretString:username}}"
+      EngineMode: "{{resolve:ssm:/config/infra/devops/rds-postgres/engine-mode}}"
+      Port: "{{resolve:ssm:/config/infra/devops/rds-postgres/port}}"
+      ManageMasterUserPassword: true
+      StorageEncrypted: true
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      EnableCloudwatchLogsExports:
+        - postgresql
+      ServerlessV2ScalingConfiguration:
+        MinCapacity: "{{resolve:ssm:/config/infra/devops/rds-postgres/min-capacity}}"
+        MaxCapacity: "{{resolve:ssm:/config/infra/devops/rds-postgres/max-capacity}}"
+      VpcSecurityGroupIds:
+        - Fn::ImportValue: !Ref SonarqubeSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Ref DBClusterIdentifier
+
+  DBInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref RdsDbClusterSonarqube
+      DBInstanceIdentifier: dso-ipd-rds-serverless-instance-sonarqube-main
+      MultiAZ: false
+      PubliclyAccessible: false
+      EnablePerformanceInsights: true
+      AvailabilityZone: !Select [0, !GetAZs '']
+      DBInstanceClass: !Ref RDSInstanceClass
+      Engine: !Ref RDSEngine
+      Tags:
+        - Key: Name
+          Value: dso-ipd-rds-serverless-instance-sonarqube-main
+        - Key: ORGANIZATION
+          Value: BGENERAL
+        - Key: DEPARTMENT
+          Value: DSO
+        - Key: CATEGORY
+          Value: DATABASE
+        - Key: SERVICE_TYPE
+          Value: RDS
+        - Key: NODE_TYPE
+          Value: SERVERLESS
+
+  DBInstanceReader:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref RdsDbClusterSonarqube
+      DBInstanceIdentifier: dso-ipd-rds-serverless-instance-sonarqube-main-reader
+      PubliclyAccessible: false
+      EnablePerformanceInsights: true
+      DBInstanceClass: !Ref RDSInstanceClass
+      Engine: !Ref RDSEngine
+      AvailabilityZone: !Select [1, !GetAZs '']
+      Tags:
+        - Key: Name
+          Value: dso-ipd-rds-serverless-instance-sonarqube-main-reader
+        - Key: ORGANIZATION
+          Value: BGENERAL
+        - Key: DEPARTMENT
+          Value: DSO
+        - Key: CATEGORY
+          Value: DATABASE
+        - Key: SERVICE_TYPE
+          Value: RDS
+        - Key: NODE_TYPE
+          Value: SERVERLESS
