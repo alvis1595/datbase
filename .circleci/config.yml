@@ -1,0 +1,107 @@
+version: 2.1
+
+executors:
+  arm-executor:
+    environment:
+      AWS_PAGER: ""
+      ENTERPRISE_NAME: dso
+      GROUP_NAME: ipic
+      SERVICE_NAME: sonarqube
+    machine:
+      image: ubuntu-2004:202101-01
+    resource_class: arm.medium
+
+jobs:
+  deploy:
+    executor: arm-executor
+    environment:
+      CIRCLE_PIPELINE_NUM: << pipeline.number >>
+      DEPLOY_ENV: <<parameters.DEPLOY_ENV>>
+      RESOURCE_NAME: <<parameters.RESOURCE_NAME>>
+    parameters:
+      DEPLOY_ENV:
+        type: string
+        enum: [prod]
+      TEMPLATE_FILE_NAME:
+        type: string
+      RESOURCE_NAME:
+        type: string
+    steps:
+      - checkout
+      - run:
+          name: Install AWS cli ☁️ 📦
+          command: |
+            chmod +x ./scripts/install_aws.sh
+            ./scripts/install_aws.sh <<parameters.DEPLOY_ENV>> <<pipeline.number>>
+      - run: chmod +x ./scripts/*
+      - run:
+          name: Deploying <<parameters.RESOURCE_NAME>> 🎯
+          command: ./scripts/deploy.sh <<parameters.TEMPLATE_FILE_NAME>> <<parameters.RESOURCE_NAME>>
+          no_output_timeout: 40m
+
+workflows:
+  sonarqube-infra:
+    jobs:
+      - approval:
+          name: Tech lead approvement prod 👓 👨‍💻
+          type: approval
+          filters:
+            branches:
+              only: feature/actualizar-stack-rds
+
+      - deploy:
+          name: Deploy IAC VPC PROD 🛰
+          DEPLOY_ENV: prod
+          TEMPLATE_FILE_NAME: vpc.yml
+          RESOURCE_NAME: vpc
+          requires:
+            - Tech lead approvement prod 👓 👨‍💻
+          filters:
+            branches:
+              only: feature/actualizar-stack-rds
+          context:
+            - DsoCloudAWS
+            - DsoCloudJfrog
+
+      - deploy:
+          name: Deploy IAC Security Groups PROD 🔐
+          DEPLOY_ENV: prod
+          TEMPLATE_FILE_NAME: sg.yml
+          RESOURCE_NAME: sg
+          requires:
+            - Deploy IAC VPC PROD 🛰
+          filters:
+            branches:
+              only: feature/actualizar-stack-rds
+          context:
+            - DsoCloudAWS
+            - DsoCloudJfrog
+
+      - deploy:
+          name: Deploy IAC Subnets PROD 🚠
+          DEPLOY_ENV: prod
+          TEMPLATE_FILE_NAME: subnets.yml
+          RESOURCE_NAME: subnet
+          requires:
+            - Deploy IAC VPC PROD 🛰
+          filters:
+            branches:
+              only: feature/actualizar-stack-rds
+          context:
+            - DsoCloudAWS
+            - DsoCloudJfrog
+
+      - deploy:
+          name: Deploy IAC Rds database PostgreSql PROD 🐘
+          DEPLOY_ENV: prod
+          TEMPLATE_FILE_NAME: rds.yml
+          RESOURCE_NAME: rds
+          requires:
+            - Deploy IAC Subnets PROD 🚠
+            - Deploy IAC Security Groups PROD 🔐
+          filters:
+            branches:
+              only: feature/actualizar-stack-rds
+          context:
+            - DsoCloudAWS
+            - DsoCloudJfrog
