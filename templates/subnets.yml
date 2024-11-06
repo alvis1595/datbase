@@ -107,3 +107,4 @@ Outputs:
     Value: !Ref PrivateSonarqubeRouteTableB
     Export:
       Name: dso-ipd-networking-private-sonarqube-rt-b
+
