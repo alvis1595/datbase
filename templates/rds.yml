@@ -12,6 +12,11 @@ Parameters:
     Default: '/config/infra/devops/rds-postgres/engine'
     Description: 'RDS Cluster engine'
 
+  DBName:
+    Description: The name of the database to create
+    Type: String
+    Default: sonarqube_db
+  
   RDSInstanceClass:
     Type: AWS::SSM::Parameter::Value<String>
     Default: '/config/infra/devops/rds-postgres/instance-class'
@@ -48,7 +53,8 @@ Resources:
         MinCapacity: "{{resolve:ssm:/config/infra/devops/rds-postgres/min-capacity}}"
         MaxCapacity: "{{resolve:ssm:/config/infra/devops/rds-postgres/max-capacity}}"
       VpcSecurityGroupIds:
-        - Fn::ImportValue: !Ref SonarqubeSecurityGroup
+        - !ImportValue SonarqubeSecurityGroup
+# arriba modifique el valor
       Tags:
         - Key: Name
           Value: !Ref DBClusterIdentifier
