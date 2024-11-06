@@ -4,7 +4,7 @@ Resources:
   SonarqubeSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: dso-ipic-networking-sonarqube-sg-private
+      GroupName: SonarqubeSecurityGroup
       VpcId: !ImportValue RDS-VPCId
       GroupDescription: Common SG for vpc Sonarqube
       SecurityGroupIngress:
@@ -14,7 +14,7 @@ Resources:
           IpProtocol: -1
       Tags:
         - Key: Name
-          Value: dso-ipic-networking-sonarqube-sg-private
+          Value: SonarqubeSecurityGroup
         - Key: ORGANIZATION
           Value: BGENERAL
         - Key: DEPARTMENT
@@ -38,4 +38,4 @@ Outputs:
     Description: Sonarqube Private Security Group
     Value: !Ref SonarqubeSecurityGroup
     Export:
-      Name: dso-ipic-networking-sonarqube-sg
+      Name: SonarqubeSecurityGroup
