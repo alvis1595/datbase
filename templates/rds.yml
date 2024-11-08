@@ -107,3 +107,32 @@ Resources:
           Value: RDS
         - Key: NODE_TYPE
           Value: SERVERLESS
+
+
+
+Resources:
+  RdsDbClusterSonarqube:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      DBClusterIdentifier: !Ref DBClusterIdentifier
+      DatabaseName : !Ref DBName
+      Engine: !Ref RDSEngine
+      EngineVersion: "13.4"
+      MasterUsername: "your_plain_text_username"
+      MasterUserPassword: "your_plain_text_password"
+      EngineMode: "serverless"
+      Port: 5432
+      ManageMasterUserPassword: false
+      StorageEncrypted: true
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      EnableCloudwatchLogsExports:
+        - postgresql
+      ServerlessV2ScalingConfiguration:
+        MinCapacity: 2
+        MaxCapacity: 4
+      VpcSecurityGroupIds:
+        - !ImportValue SonarqubeSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Ref DBClusterIdentifier
+
